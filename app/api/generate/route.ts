@@ -20,9 +20,9 @@ function pickSize(ratioId: string, customWidth?: string, customHeight?: string) 
   return preset;
 }
 
-function mapToSupportedOpenAIImageSize(width: number, height: number): "1024x1024" | "1536x1024" | "1024x1536" {
+function mapToSupportedOpenAIImageSize(width: number, height: number): "1024x1024" | "1792x1024" | "1024x1792" {
   if (width === height) return "1024x1024";
-  return width > height ? "1536x1024" : "1024x1536";
+  return width > height ? "1792x1024" : "1024x1792";
 }
 
 export async function POST(req: NextRequest) {
