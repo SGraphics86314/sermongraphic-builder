@@ -1,81 +1,33 @@
-# SermonGraphic Builder
+# SermonGraphic Builder v4
 
 A Next.js builder for generating sermon graphics, church flyers, social images, stage graphics, and web visuals using OpenAI image generation.
 
-## Features
+## What changed in v4
 
-- Sermon title, scripture, and theme inputs
-- Church-focused visual style presets
-- Preset aspect ratios:
-  - 1080x1080
-  - 1080x1350
-  - 1080x1920
-  - 1280x720
-  - 1640x624
-  - 1920x800
-  - 1920x1080
-  - 3840x2160
-  - 3840x1080
-  - 4096x1152
-  - 5760x1080
-  - 7680x2160
-- Custom size option
-- Download PNG
-- Backend safety filters for sexual content, nudity, gore, gross imagery, graphic violence, and self-harm imagery
+This version fixes the bad-looking AI results by changing the generation strategy:
 
-## Important note about image sizes
+1. OpenAI generates a **text-free background only**.
+2. The app overlays the sermon title and scripture with controlled typography using Sharp/SVG.
+3. Preview images are watermarked.
+4. Clean high-res files are generated separately through `/api/download`.
+5. Prompts now avoid cliché church-stock imagery such as generic churches, crosses, glowing Bibles, doves, and fake AI text.
 
-OpenAI image models generate in a limited set of native sizes. This app accepts your desired church output dimensions and uses the closest supported OpenAI generation shape. For exact final dimensions like 4096x1152 or 7680x2160, add a server-side resize/upscale step later.
+## Routes
 
-## Local setup
+- `/builder` - user-facing builder
+- `/api/preview` - generates a watermarked preview
+- `/api/download` - creates a clean high-res export
+- `/api/generate` - legacy route retained for compatibility
 
-```bash
-npm install
-cp .env.example .env.local
-npm run dev
-```
-
-Add your OpenAI key to `.env.local`:
-
-```bash
-OPENAI_API_KEY=sk-proj-your-key-here
-```
-
-Then open:
-
-```txt
-http://localhost:3000/builder
-```
-
-## Vercel setup
-
-1. Push this project to GitHub.
-2. Import the GitHub repo into Vercel.
-3. Add an environment variable:
+## Environment variables
 
 ```txt
 OPENAI_API_KEY=your_openai_api_key
+DOWNLOADS_REQUIRE_PAYMENT=false
 ```
 
-4. Deploy.
-5. Open `/builder` on your deployed Vercel URL.
-6. Embed that URL into Wix with an Embed Site / HTML iframe element.
+Set `DOWNLOADS_REQUIRE_PAYMENT=true` later when Stripe/Supabase credits are connected.
 
-## Safety guardrails
+## Deploy
 
-Safety lives in `lib/safety.ts` and is enforced in `app/api/generate/route.ts` before the image request reaches OpenAI.
-
-Blocked content includes:
-
-- Sexual content
-- Nudity
-- Fetish content
-- Pornographic content
-- Gore
-- Gross bodily fluids
-- Mutilation
-- Graphic violence
-- Self-harm imagery
-- Sexual content involving minors
-
-You can add more blocked terms or connect a moderation model/API later for stronger semantic filtering.
+Upload the contents of this folder to GitHub and deploy with Vercel as a Next.js project.

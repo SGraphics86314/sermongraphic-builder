@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { dataPng, friendlyOpenAIError, generateBaseImage, makeFinalExport, pickSize } from "../../../lib/generation";
+import { dataPng, friendlyOpenAIError, generateBaseImage, makePreviewExport, pickSize } from "../../../lib/generation";
 import { styles } from "../../../lib/presets";
 
 export const runtime = "nodejs";
@@ -15,17 +15,18 @@ export async function POST(req: NextRequest) {
     const ratioId = String(body.ratioId || "hd");
     const size = pickSize(ratioId, body.customWidth, body.customHeight);
 
-    const base = await generateBaseImage({ title, scripture, theme, style, size, mode: "download" });
-    const finalPng = await makeFinalExport(base.buffer, size);
+    const base = await generateBaseImage({ title, scripture, theme, style, size, mode: "preview" });
+    const preview = await makePreviewExport(base.buffer, size, { title, scripture });
 
     return NextResponse.json({
-      image: dataPng(finalPng),
+      image: dataPng(preview),
       requestedSize: size,
       generatedSize: base.generatedSize,
-      mode: "legacy-generate"
+      watermarked: true,
+      mode: "preview"
     });
   } catch (error: any) {
-    const raw = error?.message || "Image generation failed.";
+    const raw = error?.message || "Preview generation failed.";
     return NextResponse.json({ error: friendlyOpenAIError(raw) }, { status: error?.status || 500 });
   }
 }
