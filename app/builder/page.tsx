@@ -111,8 +111,12 @@ export default function BuilderPage() {
           </div>
 
           {error ? <div className="error">{error}</div> : null}
-          <div className="notice">Backend safety filters are active. Sexual content, nudity, gore, gross imagery, graphic violence, and self-harm imagery are blocked before generation.</div>
-          <div className="hint">Selected output: {selectedAspect.width}x{selectedAspect.height}. Preview is watermarked. High-res is clean.</div>
+<details className="notice">
+  <summary style={{ cursor: "pointer" }}>Content & Safety Policy</summary>
+  <div style={{ marginTop: "10px" }}>
+    Backend safety filters are active. Sexual content, nudity, gore, gross imagery, graphic violence, and self-harm imagery are blocked before generation.
+  </div>
+</details>          <div className="hint">Selected output: {selectedAspect.width}x{selectedAspect.height}. Preview is watermarked. High-res is clean.</div>
 
           <div className="hint">Quick theme ideas: {examples.join(" • ")}</div>
         </div>
