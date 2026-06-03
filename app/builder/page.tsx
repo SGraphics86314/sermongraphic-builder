@@ -1,175 +1,139 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { aspectRatios, styles } from "../../lib/presets";
+import { aspectRatios, styles } from "../../lib/config";
 
-type ApiResponse = {
-  image?: string;
-  error?: string;
-  requestedSize?: { width: number; height: number; label: string };
-  generatedSize?: string;
-  watermarked?: boolean;
-  paymentRequired?: boolean;
-  charged?: boolean;
-  mode?: "preview" | "download" | "legacy-generate";
+type FormState = {
+  title: string;
+  scripture: string;
+  theme: string;
+  style: string;
+  size: string;
 };
 
+const examples = [
+  "light breaking through storm clouds, hope after loss, modern abstract atmosphere",
+  "restored city at dawn, warm light, peace after brokenness, cinematic depth",
+  "dark valley becoming alive with golden light, clean negative space",
+  "modern conference background, deep navy and gold, subtle texture, premium worship visual"
+];
+
 export default function BuilderPage() {
-  const [title, setTitle] = useState("God Is Here");
-  const [scripture, setScripture] = useState("Ezekiel 48:35");
-  const [theme, setTheme] = useState("Restoration, peace, warm light, modern premium atmosphere");
-  const [style, setStyle] = useState(styles[0]);
-  const [ratioId, setRatioId] = useState("hd");
-  const [customWidth, setCustomWidth] = useState("");
-  const [customHeight, setCustomHeight] = useState("");
-  const [previewLoading, setPreviewLoading] = useState(false);
-  const [downloadLoading, setDownloadLoading] = useState(false);
-  const [previewImage, setPreviewImage] = useState<string | null>(null);
-  const [finalImage, setFinalImage] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [meta, setMeta] = useState<ApiResponse | null>(null);
+  const [form, setForm] = useState<FormState>({
+    title: "God Is Here",
+    scripture: "Ezekiel 48:35",
+    theme: "restoration, hope, divine presence, modern cinematic atmosphere",
+    style: "cinematic",
+    size: "hd"
+  });
+  const [image, setImage] = useState<string>("");
+  const [mode, setMode] = useState<"preview" | "download" | "">("");
+  const [loading, setLoading] = useState<"preview" | "download" | "">("");
+  const [error, setError] = useState("");
 
-  const selectedSize = useMemo(() => aspectRatios.find((r) => r.id === ratioId), [ratioId]);
-  const activeImage = finalImage || previewImage;
-  const hasPreview = Boolean(previewImage);
+  const selectedAspect = useMemo(() => aspectRatios.find((item) => item.id === form.size) || aspectRatios[0], [form.size]);
 
-  const payload = { title, scripture, theme, style, ratioId, customWidth, customHeight };
-
-  async function callImageApi(endpoint: "/api/preview" | "/api/download") {
-    const response = await fetch(endpoint, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
-
-    const data: ApiResponse = await response.json();
-    if (!response.ok) throw new Error(data.error || "Generation failed.");
-    if (!data.image) throw new Error("No image was returned.");
-    return data;
+  function update<K extends keyof FormState>(key: K, value: FormState[K]) {
+    setForm((current) => ({ ...current, [key]: value }));
   }
 
-  async function generatePreview() {
-    setPreviewLoading(true);
-    setError(null);
-    setFinalImage(null);
-    setMeta(null);
-
+  async function callApi(endpoint: "/api/preview" | "/api/download", nextMode: "preview" | "download") {
+    setError("");
+    setLoading(nextMode);
     try {
-      const data = await callImageApi("/api/preview");
-      setPreviewImage(data.image || null);
-      setMeta(data);
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form)
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Something went wrong.");
+      setImage(data.image);
+      setMode(nextMode);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
     } finally {
-      setPreviewLoading(false);
+      setLoading("");
     }
   }
 
-  async function generateHighResDownload() {
-    setDownloadLoading(true);
-    setError(null);
-    setMeta(null);
-
-    try {
-      const data = await callImageApi("/api/download");
-      setFinalImage(data.image || null);
-      setMeta(data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong.");
-    } finally {
-      setDownloadLoading(false);
-    }
-  }
-
-  function downloadCurrentImage() {
-    if (!finalImage) return;
+  function downloadImage() {
+    if (!image) return;
     const link = document.createElement("a");
-    link.href = finalImage;
-    link.download = `${title || "sermon-graphic"}-${selectedSize?.width || "custom"}x${selectedSize?.height || "size"}.png`;
+    const slug = form.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "sermon-graphic";
+    link.href = image;
+    link.download = `${slug}-${mode || "graphic"}.png`;
     link.click();
   }
 
   return (
     <main className="page">
-      <div className="shell">
-        <div className="header">
-          <div>
-            <span className="badge">SermonGraphic.com Builder</span>
-            <h1>Create church-ready graphics.</h1>
-            <p className="sub">Generate a watermarked preview first. The AI creates a text-free background, then SermonGraphic.com adds clean professional typography.</p>
+      <span className="badge">SermonGraphic.com Builder</span>
+      <h1>Create church-ready graphics that don&apos;t look like cheap AI art.</h1>
+      <p className="subtitle">Generate a clean AI background first, then let the app place polished title and scripture typography on top. Preview before committing to the high-res download.</p>
+
+      <section className="grid">
+        <div className="panel form">
+          <div className="field">
+            <label>Sermon / Event Title</label>
+            <input value={form.title} onChange={(event) => update("title", event.target.value)} placeholder="God Is Here" />
           </div>
+
+          <div className="field">
+            <label>Scripture</label>
+            <input value={form.scripture} onChange={(event) => update("scripture", event.target.value)} placeholder="Ezekiel 48:35" />
+          </div>
+
+          <div className="field">
+            <label>Theme / Direction</label>
+            <textarea value={form.theme} onChange={(event) => update("theme", event.target.value)} placeholder="restoration, hope, divine presence, modern cinematic atmosphere" />
+            <div className="hint">Tip: describe mood and metaphor, not clip art. Better: “light breaking through storm clouds.” Worse: “church with cross and Jesus.”</div>
+          </div>
+
+          <div className="row">
+            <div className="field">
+              <label>Style</label>
+              <select value={form.style} onChange={(event) => update("style", event.target.value)}>
+                {styles.map((style) => <option key={style.id} value={style.id}>{style.label}</option>)}
+              </select>
+            </div>
+            <div className="field">
+              <label>Size</label>
+              <select value={form.size} onChange={(event) => update("size", event.target.value)}>
+                {aspectRatios.map((ratio) => <option key={ratio.id} value={ratio.id}>{ratio.label}</option>)}
+              </select>
+            </div>
+          </div>
+
+          <div className="actions">
+            <button className="primary" disabled={!!loading} onClick={() => callApi("/api/preview", "preview")}>{loading === "preview" ? "Generating Preview..." : "Generate Free Preview"}</button>
+            <button className="secondary" disabled={!!loading || !image} onClick={() => callApi("/api/download", "download")}>{loading === "download" ? "Creating High-Res..." : "Purchase / Create High-Res Download"}</button>
+          </div>
+
+          {error ? <div className="error">{error}</div> : null}
+          <div className="notice">Backend safety filters are active. Sexual content, nudity, gore, gross imagery, graphic violence, and self-harm imagery are blocked before generation.</div>
+          <div className="hint">Selected output: {selectedAspect.width}x{selectedAspect.height}. Preview is watermarked. High-res is clean.</div>
+
+          <div className="hint">Quick theme ideas: {examples.join(" • ")}</div>
         </div>
 
-        <div className="grid">
-          <section className="card">
-            <div className="field">
-              <label>Sermon / Event Title</label>
-              <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="God Is Here" />
-            </div>
-            <div className="field">
-              <label>Scripture</label>
-              <input value={scripture} onChange={(e) => setScripture(e.target.value)} placeholder="Ezekiel 48:35" />
-            </div>
-            <div className="field">
-              <label>Theme / Direction</label>
-              <textarea value={theme} onChange={(e) => setTheme(e.target.value)} placeholder="Simple direction: restoration, peace, city at dawn, storm clearing, bold and modern..." />
-            </div>
-            <div className="row">
-              <div className="field">
-                <label>Style</label>
-                <select value={style} onChange={(e) => setStyle(e.target.value)}>
-                  {styles.map((s) => <option key={s}>{s}</option>)}
-                </select>
-              </div>
-              <div className="field">
-                <label>Size</label>
-                <select value={ratioId} onChange={(e) => setRatioId(e.target.value)}>
-                  {aspectRatios.map((r) => <option key={r.id} value={r.id}>{r.group}: {r.label} ({r.width}x{r.height})</option>)}
-                  <option value="custom">Custom Size</option>
-                </select>
-              </div>
-            </div>
-            {ratioId === "custom" && (
-              <div className="row">
-                <div className="field"><label>Custom Width</label><input value={customWidth} onChange={(e) => setCustomWidth(e.target.value)} placeholder="4096" /></div>
-                <div className="field"><label>Custom Height</label><input value={customHeight} onChange={(e) => setCustomHeight(e.target.value)} placeholder="1152" /></div>
-              </div>
-            )}
-            {selectedSize && <div className="hint">Selected final target: {selectedSize.width}x{selectedSize.height}. Preview is watermarked. High-res download is clean.</div>}
-
-            <button className="btn" onClick={generatePreview} disabled={previewLoading || downloadLoading || !title.trim()}>
-              {previewLoading ? "Generating Preview..." : "Generate Free Preview"}
-            </button>
-
-            <button className="btn dark" onClick={generateHighResDownload} disabled={downloadLoading || previewLoading || !hasPreview}>
-              {downloadLoading ? "Creating High-Res..." : "Purchase / Create High-Res Download"}
-            </button>
-
-            {finalImage && <button className="secondary full" onClick={downloadCurrentImage}>Download Clean PNG</button>}
-            {!hasPreview && <div className="note">High-res download stays locked until a preview has been generated. Previews are watermarked; clean files are created only after approval.</div>}
-            {error && <div className="error">{error}</div>}
-            <div className="safety">Backend safety filters are active. Sexual content, nudity, gore, gross imagery, graphic violence, and self-harm imagery are blocked before generation.</div>
-          </section>
-
-          <section className="card preview">
-            {!activeImage ? (
+        <div className="panel stage">
+          <div className="canvasWrap">
+            {image ? <img className="resultImage" src={image} alt="Generated sermon graphic" /> : (
               <div className="placeholder">
-                <h2>Your designed preview will appear here</h2>
-                <p>The AI generates a clean background only. The app adds the sermon title and scripture with controlled typography so the result does not look like cheap AI text art.</p>
-              </div>
-            ) : (
-              <div className="resultWrap">
-                <img className="resultImage" src={activeImage} alt={finalImage ? "Final sermon graphic" : "Watermarked sermon graphic preview"} />
-                {meta && <p className="meta">Mode: {meta.mode}. Base generated: {meta.generatedSize}. Target: {meta.requestedSize?.width}x{meta.requestedSize?.height}. {meta.watermarked ? "Watermarked preview." : "Clean high-res output."}</p>}
-                <div className="actions">
-                  <button className="secondary" onClick={generatePreview} disabled={previewLoading || downloadLoading}>{previewLoading ? "Generating..." : "Generate New Preview"}</button>
-                  <button className="secondary" onClick={generateHighResDownload} disabled={downloadLoading || previewLoading || !hasPreview}>{downloadLoading ? "Creating..." : "Create Clean Download"}</button>
-                </div>
+                <strong>Your graphic will appear here</strong>
+                <span>Generate a watermarked preview first. If you like it, create the clean high-res download.</span>
               </div>
             )}
-          </section>
+          </div>
+          {image ? (
+            <div className="resultActions">
+              <button onClick={downloadImage}>Download Current PNG</button>
+              <button onClick={() => callApi("/api/preview", "preview")} disabled={!!loading}>Try Another Preview</button>
+            </div>
+          ) : null}
         </div>
-      </div>
+      </section>
     </main>
   );
 }

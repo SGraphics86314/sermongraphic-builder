@@ -1,48 +1,38 @@
 import { NextRequest, NextResponse } from "next/server";
-import { dataPng, friendlyOpenAIError, generateBaseImage, makeFinalExport, pickSize } from "../../../lib/generation";
-import { styles } from "../../../lib/presets";
+import { checkSafety } from "../../../lib/safety";
+import { composeGraphic, generateBaseImage, type BuildInput } from "../../../lib/graphics";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
 
-function isPaidOrDemoUnlocked(req: NextRequest) {
-  // Temporary launch-mode gate.
-  // Later, replace this with Stripe/Supabase credits:
-  // verify user -> verify credits/subscription -> generate -> deduct one credit.
-  if (process.env.DOWNLOADS_REQUIRE_PAYMENT !== "true") return true;
-  return req.headers.get("x-sermongraphic-paid") === "true";
+function clean(value: unknown) {
+  return typeof value === "string" ? value.trim() : "";
 }
 
 export async function POST(req: NextRequest) {
   try {
-    if (!isPaidOrDemoUnlocked(req)) {
-      return NextResponse.json({
-        error: "Payment or credits required before downloading the clean high-res file.",
-        paymentRequired: true
-      }, { status: 402 });
-    }
-
     const body = await req.json();
-    const title = String(body.title || "").trim();
-    const scripture = String(body.scripture || "").trim();
-    const theme = String(body.theme || "").trim();
-    const style = String(body.style || styles[0]).trim();
-    const ratioId = String(body.ratioId || "hd");
-    const size = pickSize(ratioId, body.customWidth, body.customHeight);
+    const input: BuildInput = {
+      title: clean(body.title),
+      scripture: clean(body.scripture),
+      theme: clean(body.theme),
+      style: clean(body.style) || "cinematic",
+      size: clean(body.size) || "hd"
+    };
 
-    const base = await generateBaseImage({ title, scripture, theme, style, size, mode: "download" });
-    const finalPng = await makeFinalExport(base.buffer, size, { title, scripture });
+    if (!input.title) return NextResponse.json({ error: "Add a sermon or event title." }, { status: 400 });
+    if (!input.theme) return NextResponse.json({ error: "Add a theme or direction." }, { status: 400 });
 
-    return NextResponse.json({
-      image: dataPng(finalPng),
-      requestedSize: size,
-      generatedSize: base.generatedSize,
-      watermarked: false,
-      charged: process.env.DOWNLOADS_REQUIRE_PAYMENT === "true",
-      mode: "download"
-    });
-  } catch (error: any) {
-    const raw = error?.message || "High-res download generation failed.";
-    return NextResponse.json({ error: friendlyOpenAIError(raw) }, { status: error?.status || 500 });
+    // Payment hook goes here. Before public launch, check Stripe/credits before continuing.
+    const safety = checkSafety(`${input.title} ${input.scripture} ${input.theme}`);
+    if (!safety.ok) return NextResponse.json({ error: safety.message }, { status: 400 });
+
+    const base = await generateBaseImage(input, "download");
+    const image = composeGraphic(input, base.base64, "download");
+
+    return NextResponse.json({ image, mode: "download" });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "High-res generation failed.";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "SermonGraphic Builder",
-  description: "Generate sermon graphics, church flyers, and stage visuals."
+  description: "Create church-ready sermon graphics, flyers, stage visuals, and social media images."
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
