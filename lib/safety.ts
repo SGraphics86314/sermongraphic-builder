@@ -18,3 +18,7 @@ export function checkSafety(input: string) {
   }
   return { ok: true, message: "" };
 }
+export const safetyInstruction = `
+Do not generate sexual content, nudity, gore, gross imagery, graphic violence, self-harm imagery, fetish content, or sexualized minors.
+Keep all output church-appropriate, clean, professional, and suitable for public ministry use.
+`;
