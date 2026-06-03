@@ -1,1 +1,5 @@
-export { POST, runtime, maxDuration } from "../preview/route";
+import { POST } from "../preview/route";
+
+export const runtime = "nodejs";
+export const maxDuration = 60;
+export { POST };
