@@ -1,15 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import { generateBackground } from "../../../lib/generator";
+import { generateGraphicBackground } from "../../../lib/graphics";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
 
 export async function POST(req: NextRequest) {
   try {
-    const payload = await req.json();
-    const image = await generateBackground(payload);
-    return NextResponse.json({ image, mode: "preview", watermark: true });
-  } catch (error: any) {
-    return NextResponse.json({ error: error?.message || "Unable to create preview." }, { status: 400 });
+    const body = await req.json();
+    const result = await generateGraphicBackground({ ...body, mode: "preview" });
+    return NextResponse.json({ ...result, mode: "preview" });
+  } catch (error) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : "Generation failed." }, { status: 400 });
   }
 }

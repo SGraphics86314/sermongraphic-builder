@@ -13,7 +13,8 @@ export function checkSafety(input: string) {
   if (hit) {
     return {
       ok: false,
-      message: "This request was blocked by the safety rules. Please keep graphics clean, church-appropriate, and free from sexual, nude, gore, gross, or graphic violent content."
+      message:
+        "This request was blocked by the safety rules. Please keep graphics clean, church-appropriate, and free from sexual, nude, gore, gross, graphic violent, or self-harm content."
     };
   }
   return { ok: true, message: "" };
