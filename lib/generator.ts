@@ -67,7 +67,7 @@ Visual metaphor direction:
 ${metaphor}
 
 Style DNA based on SermonGraphic.com examples:
-- ${style.prompt}
+- ${style.description}
 - ${style.palette}
 - ${metaphorHints.join("\n- ")}
 - one dominant concept only
