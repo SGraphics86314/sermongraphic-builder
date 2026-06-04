@@ -80,3 +80,27 @@ export function getAspect(id: string) {
 export function getStyle(id: string) {
   return styles.find((item) => item.id === id) || styles[0];
 }
+export const bannedVisualCliches = [
+  "generic church building",
+  "cross on a hill",
+  "open bible on a table",
+  "praying hands",
+  "dove",
+  "heaven clouds",
+  "glowing Jesus figure",
+  "cheap Christian stock photo",
+  "random worship crowd",
+  "clip art symbols"
+];
+
+export const metaphorHints = [
+  "single dominant visual metaphor",
+  "cinematic lighting",
+  "dark edges with bright focal point",
+  "atmospheric haze",
+  "strong depth",
+  "premium sermon artwork",
+  "editorial composition",
+  "one clear subject",
+  "negative space for typography"
+];
