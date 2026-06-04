@@ -92,3 +92,10 @@ export const metaphorHints = [
   "Prefer cinematic objects, environments, silhouettes, light, weather, dust, glass, water, fire, roads, deserts, cities, storms, caves, lenses, hourglasses, honey, crowns, thorns, gates, prisons, or abstract atmosphere when conceptually fitting.",
   "Leave clean space for typography overlay. Do not put any words, letters, captions, numbers, logos, handwriting, or Bible verse text inside the generated image."
 ];
+export function getAspect(id: string) {
+  return aspectRatios.find((item) => item.id === id) || aspectRatios[0];
+}
+
+export function getStyle(id: string) {
+  return styles.find((item) => item.id === id) || styles[0];
+}
