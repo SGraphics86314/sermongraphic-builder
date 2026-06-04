@@ -1,9 +1,9 @@
-import type { Metadata } from "next";
 import "./globals.css";
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "SermonGraphic Builder",
-  description: "Create church-ready sermon graphics, flyers, stage visuals, and social media images."
+  description: "Create concept-driven church-ready sermon graphics."
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

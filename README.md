@@ -1,26 +1,17 @@
 # SermonGraphic Builder
 
-A Next.js sermon graphic builder that generates text-free AI backgrounds and overlays clean controlled typography in the app.
+Concept-first AI sermon graphic builder based on the SermonGraphic.com visual style.
 
-## Deploy
+## Vercel Environment Variable
 
-1. Upload all files in this folder to GitHub.
-2. Import the repo into Vercel.
-3. Add environment variable:
-
-```txt
-OPENAI_API_KEY=your_openai_key_here
-```
-
-4. Deploy.
+`OPENAI_API_KEY=your_key_here`
 
 ## Routes
 
-- `/` redirects to `/builder`
-- `/builder` app UI
-- `/api/preview` generates watermarked preview
-- `/api/download` generates clean high-res output placeholder
+- `/builder` main tool
+- `/api/preview` watermarked preview image
+- `/api/download` clean high-res image
 
 ## Notes
 
-Preview and download both call OpenAI. Add Stripe/credits before public launch.
+This app generates a text-free AI background, then overlays the sermon typography in the browser using your style system. That keeps titles clean instead of letting AI misspell or make generic church posters.

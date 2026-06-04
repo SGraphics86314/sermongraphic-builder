@@ -13,13 +13,15 @@ export function checkSafety(input: string) {
   if (hit) {
     return {
       ok: false,
-      message: "This request was blocked by the safety rules. Sexual content, nudity, gore, gross imagery, graphic violence, self-harm imagery, and sexualized minors are not allowed."
+      message: "This request was blocked by the safety rules. Please keep graphics clean, church-appropriate, and free from sexual, nude, gore, gross, or graphic violent content."
     };
   }
   return { ok: true, message: "" };
 }
+
+export const validateImageRequest = checkSafety;
+
 export const safetyInstruction = `
 Do not generate sexual content, nudity, gore, gross imagery, graphic violence, self-harm imagery, fetish content, or sexualized minors.
 Keep all output church-appropriate, clean, professional, and suitable for public ministry use.
 `;
-export const validateImageRequest = checkSafety;
