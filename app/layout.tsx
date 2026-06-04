@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "SermonGraphic Builder",
-  description: "Create concept-driven church-ready sermon graphics."
+  description: "Create cinematic sermon graphics with concept-first AI generation."
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
