@@ -67,8 +67,7 @@ Visual metaphor direction:
 ${metaphor}
 
 Style DNA based on SermonGraphic.com examples:
-- ${style.description}
-- ${style.palette}
+- SermonGraphic premium style: cinematic, concept-driven, dramatic lighting, strong focal point, editorial typography space, modern ministry artwork.- ${style.palette}
 - ${metaphorHints.join("\n- ")}
 - one dominant concept only
 - cinematic lighting, volumetric haze, atmospheric depth
